@@ -36,6 +36,7 @@ local.properties
 .settings
 .classpath
 .project
+.idea
 
 # Gradle profiler files
 /profile-out*

@@ -99,6 +99,8 @@ import com.android.designcompose.definition.plugin.OverlayBackgroundInteraction
 import com.android.designcompose.definition.plugin.OverlayPositionType
 import com.android.designcompose.definition.plugin.colorOrNull
 import com.android.designcompose.definition.plugin.overlayBackgroundOrNull
+import com.android.designcompose.definition.view.ComponentInfo
+import com.android.designcompose.definition.view.componentInfoOrNull
 import com.android.designcompose.definition.view.copy
 import com.android.designcompose.definition.view.scrollInfoOrNull
 import com.android.designcompose.dispatch
@@ -1267,6 +1269,8 @@ private fun SquooshChildLayout(
                 object : ComponentReplacementContext {
                     override val layoutModifier: Modifier = Modifier
                     override val textStyle: TextStyle? = child.textStyle
+                    override val componentInfo: ComponentInfo
+                        get() = child.node.view.componentInfoOrNull ?: ComponentInfo.getDefaultInstance()
                 }
             )
         },

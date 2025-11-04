@@ -41,7 +41,10 @@ lazy_static.workspace = true
 clap = { workspace = true, optional = true }
 
 # logging
-log.workspace = true
+#log.workspace = true
+log = "0.4"
+android_logger = "0.13"
+env_logger = "0.10"
 
 [build-dependencies]
 vergen.workspace = true

@@ -17,6 +17,7 @@
 package com.android.designcompose
 
 import android.graphics.Bitmap
+import android.util.Log
 import androidx.compose.foundation.gestures.ScrollableState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -32,6 +33,8 @@ import com.android.designcompose.definition.element.DimensionProto
 import com.android.designcompose.definition.element.ShaderUniform
 import com.android.designcompose.definition.view.ComponentInfo
 import com.android.designcompose.definition.view.View
+import com.android.designcompose.definition.view.ViewData
+import com.android.designcompose.definition.view.ViewStyle
 import com.android.designcompose.definition.view.componentInfoOrNull
 import java.util.Optional
 import kotlin.jvm.optionals.getOrNull
@@ -316,6 +319,101 @@ interface ComponentReplacementContext {
     // Return the text style, if the component being replaced is a text node in the Figma
     // document.
     val textStyle: TextStyle?
+
+    // Component info with all overrides data. Note: Due to Proto3 limitations, the overrides
+    // contain full ViewStyle/ViewData objects with many default values, not just the delta.
+    // Use the helper extension functions below to check specific properties you care about.
+    val componentInfo: ComponentInfo
+}
+
+// A simplified view of meaningful overrides, filtering out Proto3 default values
+data class MeaningfulOverrides(
+    // Background/fill overrides (if any backgrounds are defined)
+    val backgrounds: List<Background>? = null,
+    // Text content override (if text data was changed)
+    val textContent: String? = null,
+    // Opacity override (if not default 1.0)
+    val opacity: Float? = null,
+    // Stroke override (if stroke is defined)
+    val hasStroke: Boolean = false,
+    // Display type override (useful to know if something was hidden)
+    val isHidden: Boolean = false,
+)
+
+// Helper extension function to get overrides for a specific child node by name
+fun ComponentReplacementContext.getOverridesForNode(nodeName: String): com.android.designcompose.definition.view.ComponentOverrides? {
+    Log.d("Library", "I'm in the lib")
+    return componentInfo.overridesTableMap[nodeName]
+}
+
+// Helper extension function to extract meaningful (non-default) overrides from ComponentOverrides
+fun ComponentReplacementContext.getMeaningfulOverrides(nodeName: String): MeaningfulOverrides? {
+    val overrides = componentInfo.overridesTableMap[nodeName] ?: return null
+
+    var backgrounds: List<Background>? = null
+    var textContent: String? = null
+    var opacity: Float? = null
+    var hasStroke = false
+    var isHidden = false
+
+    // Check style overrides
+    if (overrides.hasStyle()) {
+        val style = overrides.style
+
+        // Check for background overrides (non-empty list means backgrounds were set)
+        if (style.hasNodeStyle() && style.nodeStyle.backgroundsCount > 0) {
+            backgrounds = style.nodeStyle.backgroundsList
+        }
+
+        // Check for opacity overrides (if not default 1.0)
+        if (style.hasNodeStyle() && style.nodeStyle.opacity != 1.0f && style.nodeStyle.opacity != 0.0f) {
+            opacity = style.nodeStyle.opacity
+        }
+
+        // Check for stroke overrides (if stroke has any strokes defined)
+        if (style.hasNodeStyle() && style.nodeStyle.hasStroke() && style.nodeStyle.stroke.strokesCount > 0) {
+            hasStroke = true
+        }
+
+        // Check if display type was set to none (hidden)
+        if (style.hasNodeStyle() && style.nodeStyle.displayType == com.android.designcompose.definition.view.Display.DISPLAY_NONE) {
+            isHidden = true
+        }
+    }
+
+    // Check view data overrides (text content)
+    if (overrides.hasViewData()) {
+        val viewData = overrides.viewData
+        if (viewData.hasText()) {
+            textContent = viewData.text.content
+        } else if (viewData.hasStyledText()) {
+            // For styled text, concatenate all runs
+            textContent = viewData.styledText.styledTextsList.joinToString("") { it.text }
+        }
+    }
+
+    // Only return if we found at least one meaningful override
+    if (backgrounds != null || textContent != null || opacity != null || hasStroke || isHidden) {
+        return MeaningfulOverrides(
+            backgrounds = backgrounds,
+            textContent = textContent,
+            opacity = opacity,
+            hasStroke = hasStroke,
+            isHidden = isHidden
+        )
+    }
+
+    return null
+}
+
+// Helper extension function to check if a node has any overrides
+fun ComponentReplacementContext.hasOverrides(nodeName: String): Boolean {
+    return componentInfo.overridesTableMap.containsKey(nodeName)
+}
+
+// Helper extension function to get all node names that have overrides
+fun ComponentReplacementContext.getNodesWithOverrides(): Set<String> {
+    return componentInfo.overridesTableMap.keys
 }
 
 fun CustomizationContext.setComponent(

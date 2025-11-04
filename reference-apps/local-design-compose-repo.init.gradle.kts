@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+// I think this was used in part of the initial setup to get it building for local dev?
+
 settingsEvaluated {
     logger.warn(
         "Init script is overwriting declared repositories to use a local DesignCompose maven repo"

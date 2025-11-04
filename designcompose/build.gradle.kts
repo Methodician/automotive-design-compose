@@ -105,6 +105,8 @@ dependencies {
     api(libs.androidx.compose.runtime)
     api(libs.androidx.compose.ui)
     api(libs.androidx.compose.ui.text)
+    // Changed to 'api' because ComponentInfo is exposed in public API (ComponentReplacementContext)
+    api(libs.protobuf.kotlin.lite)
 
     // Dependencies that
     implementation(libs.androidx.core)
@@ -118,7 +120,6 @@ dependencies {
     implementation(libs.guavaAndroid)
     implementation(libs.androidx.tracing.ktx)
     implementation(libs.androidx.compose.runtime.tracing)
-    implementation(libs.protobuf.kotlin.lite)
 
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)

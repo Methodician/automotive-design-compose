@@ -511,11 +511,12 @@ impl Document {
     /// overridden in the instance compared to the reference component. If we then render a
     /// different variant of the component (due to an interaction) we can apply these delta
     /// styles to get the correct output.
-    fn compute_component_overrides(&self, nodes: &mut HashMap<NodeQuery, View>) {
+    fn compute_component_overrides(&self, nodes: &mut HashMap<NodeQuery, View>) { // Here is where it's computed
         // XXX: Would be nice to avoid cloning here. Do we need to? We need to mutate the
         //      instance views in place. And we can't hold a ref and a mutable ref to nodes
         //      at the same time.
         let reference_components = nodes.clone();
+        println!("Hey!");
 
         // This function finds all of the Component Instances (views with a populated
         // component_info field) in the given view tree, and looks up which component
@@ -681,6 +682,9 @@ impl Document {
                                 } else {
                                     MessageField::none()
                                 };
+
+                                log::debug!("override style: {:?}", override_view_style);
+                                log::debug!("override data: {:?}", override_view_data);
 
                             if override_view_style.is_some() || override_view_data.is_some() {
                                 component_info.overrides_table.insert(
@@ -1061,7 +1065,7 @@ impl Document {
         }
 
         // Populate the override data for components.
-        self.compute_component_overrides(&mut views);
+        self.compute_component_overrides(&mut views); // only place this seems to be called
 
         // Update our mapping from instance to component set.
         self.component_sets = component_id_index
