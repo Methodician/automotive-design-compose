@@ -133,6 +133,9 @@ internal class SquooshChildComposable(
 
     // TextStyle to be used in ComponentReplacementContext if replacing a text node
     val textStyle: TextStyle? = null,
+
+    // ComponentInfo to be used in ComponentReplacementContext if replacing a component instance
+    val componentInfo: ComponentInfo? = null,
 )
 
 internal class SquooshOverlayComposable(val nodeId: String, val extras: FrameExtras)
@@ -371,6 +374,7 @@ internal fun resolveVariantsRecursively(
                 node = resolvedView,
                 parentComponents = parentComps,
                 textStyle = textStyle,
+                componentInfo = if (viewFromTree.hasComponentInfo()) viewFromTree.componentInfo else null,
             )
         )
         // Make sure that the renderer knows that it needs to do an external render for this
