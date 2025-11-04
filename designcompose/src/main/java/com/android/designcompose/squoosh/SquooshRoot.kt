@@ -1267,6 +1267,7 @@ private fun SquooshChildLayout(
                 object : ComponentReplacementContext {
                     override val layoutModifier: Modifier = Modifier
                     override val textStyle: TextStyle? = child.textStyle
+                    override val componentInfo: ComponentInfo? = child.componentInfo
                 }
             )
         },

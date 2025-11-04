@@ -560,6 +560,16 @@ impl Document {
                     let reference_component_option =
                         queries.iter().find_map(|query| reference_components.get(query));
 
+                    if reference_component_option.is_none() {
+                        log::debug!(
+                            "Component instance '{}' (id: {}, component_set: {}) - no reference component found. Tried queries: {:?}",
+                            view.name,
+                            info.id,
+                            info.component_set_name,
+                            queries
+                        );
+                    }
+
                     if reference_component_option.is_some() {
                         action(
                             view.style.clone(),
@@ -683,6 +693,14 @@ impl Document {
                                 };
 
                             if override_view_style.is_some() || override_view_data.is_some() {
+                                log::debug!(
+                                    "Recording override for '{}' (key: {}, is_root: {}) - style_override: {}, data_override: {}",
+                                    component_info.name,
+                                    overrides_table_key,
+                                    is_component_root,
+                                    override_view_style.is_some(),
+                                    override_view_data.is_some()
+                                );
                                 component_info.overrides_table.insert(
                                     overrides_table_key,
                                     ComponentOverrides {
@@ -690,6 +708,14 @@ impl Document {
                                         view_data: override_view_data,
                                         ..Default::default()
                                     },
+                                );
+                            } else {
+                                log::debug!(
+                                    "No overrides found for '{}' (key: {}, is_root: {}) - style matches: {}, data matches",
+                                    component_info.name,
+                                    overrides_table_key,
+                                    is_component_root,
+                                    view_style == template_view.style
                                 );
                             }
                         }

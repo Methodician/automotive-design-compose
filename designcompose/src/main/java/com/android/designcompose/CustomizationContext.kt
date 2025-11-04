@@ -316,6 +316,46 @@ interface ComponentReplacementContext {
     // Return the text style, if the component being replaced is a text node in the Figma
     // document.
     val textStyle: TextStyle?
+
+    // Return the component info for the component being replaced, if it is a component instance.
+    // This includes the component's ID, name, and calculated overrides.
+    val componentInfo: ComponentInfo?
+        get() = null
+}
+
+// Extension functions for ComponentReplacementContext to access override information
+
+/**
+ * Returns the overrides table map from the component info, or an empty map if no component info.
+ * The map keys are either component_set_name (for root component) or view_name (for descendants).
+ * This contains style and view data overrides that were calculated by comparing the instance
+ * with its main component definition.
+ */
+fun ComponentReplacementContext.getOverridesMap(): Map<String, com.android.designcompose.definition.view.ComponentOverrides> {
+    return componentInfo?.overridesTableMap ?: emptyMap()
+}
+
+/**
+ * Returns the component ID if this is a component instance, null otherwise.
+ * This ID can be used to fetch the main component from the library.
+ */
+fun ComponentReplacementContext.getComponentId(): String? {
+    return componentInfo?.id
+}
+
+/**
+ * Returns the component name if this is a component instance, null otherwise.
+ */
+fun ComponentReplacementContext.getComponentName(): String? {
+    return componentInfo?.name
+}
+
+/**
+ * Returns the component set name if this is a component instance, null otherwise.
+ * This is the name of the component set (variant group) that this component belongs to.
+ */
+fun ComponentReplacementContext.getComponentSetName(): String? {
+    return componentInfo?.componentSetName
 }
 
 fun CustomizationContext.setComponent(
